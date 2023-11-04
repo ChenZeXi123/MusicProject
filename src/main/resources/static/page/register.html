@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+</head>
+<style>
+    div[id="return"]{
+        margin-left: 1200px;
+        font-weight: bold;
+        font-size: 20px;
+        color: black;
+    }
+    /*注册信息的盒子*/
+    #registerBox{
+        text-align: center;
+        margin-top: 220px;
+        width: 500px;
+        align-content: center;
+        margin-left: 600px ;
+        font-family: 楷体;
+        font-size: 20px;
+    }
+
+    input{
+        margin-top: 10px;
+        width: 250px;
+        height: 30px;
+       border-radius: 5px;
+    }
+
+    input[type=submit]{
+        margin-top: 20px;
+        margin-left: 40px;
+        color: #ff976f;
+        cursor: pointer;
+        width: 120px;
+    }
+
+    body{
+        margin-bottom: 20px;
+        background-repeat: no-repeat;
+        background-image:url("../pictrue/img_13.png");
+        background-size: 1560px;
+        background-position: 0 0;
+    }
+
+    span[id="errorMsg"]{
+        margin-top: 20px;
+        text-align: right;
+        color: red;
+        font-size: 20px;
+        font-family: 楷体;
+    }
+
+    #welcomeBox{
+        float: left;
+        margin: 250px 10px 100px 200px;
+        font-size: 100px;
+        font-family: 楷体;
+    }
+
+</style>
+<body>
+<div id="return">
+    <a href="/page/index.html">返回音乐城</a>
+</div>
+<div id="welcomeBox">
+    <span>欢迎注册</span>
+</div>
+<div id="registerBox" >
+    <form action="/judgeRegister" method="post">
+    <h1>注册账号</h1>
+    <label for="username">名曰:</label>
+    <input id="username" type="text" name="username">
+    <br>
+    <label for="password">设密:</label>
+    <input id="password" type="password" name="password">
+    <br>
+    <label for="email">邮箱:</label>
+    <input id="email" type="email" name="email">
+    <br>
+    <input id="registButton" type="submit" value="注册"> <span id="errorMsg" th:text="${msg}"></span>
+    </form>
+</div>
+
+</body>
+</html>

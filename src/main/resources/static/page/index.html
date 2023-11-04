@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>音乐城首页</title>
+    <script src="../js/vue.js"></script>
+    <script src="../js/axios-0.18.0.js"></script>
+    <link rel="stylesheet" href="/webjars/element-ui/2.15.1/lib/theme-chalk/index.css">
+    <script src="/webjars/vue/2.6.11/dist/vue.js"></script>
+    <script src="/webjars/element-ui/2.15.1/lib/index.js"></script>
+    <style>
+
+        /*包裹音乐的最外面的框(背景框)*/
+        div[id="main"]{
+            background-image: url("../pictrue/img_20.png");
+            background-repeat: no-repeat;
+            background-size: 1700px;
+            background-position: center;
+            margin-left: 30px;
+            width: 1400px;
+            height:700px;
+            border: #cccccc 1px solid;
+            font-family: 楷体;
+            font-size: 20px;
+        }
+
+
+        /*首页中的登录、注册、我的音乐的超链接的盒子*/
+        div[id="index"]{
+            display: flex;
+            margin-left: 1000px;
+        }
+
+        /*搜索栏盒子*/
+        div[id="searchMusic"]{
+            margin-left: 500px;
+            margin-top: 150px;
+            display: flex;
+            width: 400px;
+        }
+
+        button{
+            width: 100px;
+        }
+
+
+        /*包裹音乐信息的父盒子,仅仅用于将子盒子排版设置为并排*/
+        div[id="musicContainer"]{
+            display: flex; /*将其子标签按照并排方式排列*/
+        }
+
+        /*包裹音乐所有内容信息的盒子*/
+        div[id="list"]{
+            width: 320px;
+            height: 355px;
+            border: 1px solid black;
+            margin-top: 50px;
+            margin-left: 20px;
+        }
+
+        /*
+        音乐播放器
+        播放器的width默认为300px,不能修改
+        */
+        div[id="audio"]{
+            text-align: center;
+        }
+
+        /*音乐的图片*/
+        div[id="music_img"]{
+            text-align: center;
+        }
+
+        /*包裹音乐的名字和作者*/
+        div[id="music_info"]{
+            background-color: #cccccc;
+        }
+
+        div[id="music_name"]{
+            text-align: center;
+        }
+
+        div[id="music_author"]{
+            text-align: center;
+        }
+
+        /*光标在图片时显示的效果为手指*/
+        img{
+            cursor: pointer;
+        }
+
+        /*分页导航框的大小*/
+        div[id="page"]{
+            border: 3px solid black;
+            border-radius: 50px;
+            width: 600px;
+            height: 30px;
+            text-align: center;
+            font-size: 15px;
+            margin-top: 20px;
+            margin-left: 450px;
+            font-weight: bold;/*加粗字体*/
+        }
+
+        a{
+            margin-left: 10px;
+            font-size: 25px;
+            cursor: pointer;
+            text-decoration-line:none ;/*超链接的取消下划线*/
+        }
+
+        /*页脚*/
+        div[id="bottom"]{
+            text-align: center;
+        }
+
+
+
+    </style>
+</head>
+
+<body>
+<div id="app">
+
+    <!--背景盒子-->
+    <div id="main" >
+        <!--首页超链接盒子-->
+        <div id="index">
+            <a  id="login" href="/page/login.html">登录</a>
+            <a id="register" href="/page/register.html">注册</a>
+            <a id="myMusic" href="/page/personalMusic.html">我的音乐</a>
+            <a id="musicManage" href="/page/manager/managerIndex.html">后台管理</a>
+        </div>
+
+        <div id="searchMusic">
+            <el-input   placeholder="请输入要查找的音乐名称或作者名" v-model="inputSearchMusic"
+                       prefix-icon="el-icon-search">
+            </el-input>
+            <button  @click="searchMusic(inputSearchMusic)">搜索</button>
+        </div>
+
+        <!--音乐信息盒子-->
+        <div id="musicContainer">
+            <div id="list" v-for="(music,index) in musics" :key="music.name">
+                <div id="music_img">
+                    <img :src=music.imgPath width="320px" height="240px" @click="insertMusic(music)" :title="insertMyMusic">
+                </div>
+                <div id="audio">
+                    <audio :src="music.audioPath" controls="controls" ></audio>
+                </div>
+                <div id="music_info">
+                    <div id="music_name">
+                        歌名:<span>{{music.name}}</span>
+                    </div>
+                    <div id="music_author">
+                        作者:<span>{{music.author}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--分页盒子-->
+        <div id="page" v-show="this.pageInfo.total!==0">
+            <a v-show="pageInfo.pageNum!==1" @click="getMusicByPageNum(1)" >首页</a>
+            <a v-show="this.pageInfo.hasPreviousPage" @click="getMusicByPageNum(pageInfo.prePage)" >上一页</a>
+
+            <!--遍历分页导航页码,将当前元素作为形参,从而获取当前点击的是第几页-->
+            <a  class="navigatePage" v-for="(page,index) in pages"
+               @click="getMusicByPageNum(page)">
+                <span v-if="pageInfo.pageNum===page">[{{page}}]</span>
+                <span v-else>{{page}}</span>
+            </a>
+
+            <a v-show="pageInfo.hasNextPage" @click="getMusicByPageNum(pageInfo.nextPage)">下一页</a>
+            <a v-show="pageInfo.pageNum!==pageInfo.pages" @click="getMusicByPageNum(pageInfo.pages)" >末页</a>
+
+            <span>总共有{{pageInfo.pages}}页,有{{pageInfo.total}}条数据</span>
+        </div>
+
+    </div>
+
+    <!--页脚-->
+    <div id="bottom">
+			<span>
+				音乐城.Copyright &copy;2023
+			</span>
+    </div>
+</div>
+</body>
+
+<script>
+    new Vue({
+        el:"#app",
+        data:{
+            pageInfo:[], //整个分页之后所有数据
+            musics:[],  //分页中实体类数据信息
+            pages:[], //分页导航信息
+            insertMyMusic:"添加至我的音乐", //用于光标停留在图片时,出现的提示词
+            inputSearchMusic:"" //用于封装搜索栏中的内容
+        },
+
+        mounted(){
+             this.getAll();
+        },
+
+        methods:{
+            getAll(){
+                axios.get("/getAll").then((res)=>{
+                    //当前的res返回得到的数据是分页插件中的所有信息,封装在pageInfo中
+                    this.pageInfo=res.data;
+
+                    //将获取到的音乐数组数据封装到data的musics属性中
+                    this.musics=res.data.list;
+
+                    //将分页导航内容封装到pages中
+                    this.pages=res.data.navigatepageNums;
+                })
+            },
+
+            getMusicByPageNum(page){
+                //page为当前页码
+                axios.get("/getMusicByPageNum?pageNum="+page).then((res)=>{
+                    //当前的res返回得到的数据是分页插件中的所有信息,封装在pageInfo中
+                     this.pageInfo=res.data;
+                    //将查询得到的music数据封装在music中
+                     this.musics=res.data.list;
+                    //将分页插件中的分页导航信息封装在pages中
+                     this.pages=res.data.navigatepageNums;
+                })
+            },
+
+            insertMusic(music){
+                this.$confirm('确定要添加['+music.name+'], 至我的音乐吗?', '提示', {type: 'info'}).then(() => {
+                    axios.post("/insertMusic",JSON.stringify(music),
+                        {headers: {'Content-Type': 'application/json'}}).then((res)=>{
+                         var msg = res.data;
+                         //判断个人音乐中是否已存在该音乐
+                         if (msg!=null && msg!==""){
+                             this.$message({
+                                 type: "info",
+                                 message: msg
+                             });
+                         }else {
+                             this.$message({
+                                 type: 'success',
+                                 message: '添加成功!'
+                             });
+                         }
+
+                    })
+                }).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '已取消删除'
+                        });
+                });
+
+            },
+
+            searchMusic(nameOrAuthor){
+                axios.get("/getMusicByName?nameOrAuthor="+nameOrAuthor).then((res)=>{
+                    //当前的res返回得到的数据是分页插件中的所有信息,封装在pageInfo中
+                    this.pageInfo=res.data;
+                    //将获取到的音乐数组数据封装到data的musics属性中
+                    this.musics=res.data.list;
+                    //将分页导航内容封装到pages中
+                    this.pages=res.data.navigatepageNums;
+
+                    if (this.pageInfo.total===0){
+                        this.$message({
+                            type:"info",
+                            message:"查无此音乐噢！"
+                        });
+                    }
+                })
+           }
+        }
+    })
+</script>
+</html>

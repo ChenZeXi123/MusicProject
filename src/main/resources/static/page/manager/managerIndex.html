@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+</head>
+<style>
+    /*页头盒子:仅用于管理标题和超链接的排版*/
+    div[id="headBox"]{
+        display: flex; /*并排显示*/
+    }
+
+    /*标题盒子:后台管理系统*/
+    div[id=title]{
+        margin-left: 200px;
+        margin-top: 100px;
+        color: #726d6d;
+        font-size: 50px;
+    }
+
+    /*超链接的盒子*/
+    div[id=manager]{
+        margin-left: 600px;
+        font-size: 20px;
+        margin-top: 150px;
+    }
+
+    a{
+        text-decoration: none;
+    }
+
+
+
+    /*显示内容的盒子*/
+    div[id="main"]{
+        border: 1px solid;
+        width: 1100px;
+        height: 500px;
+        margin-left: 200px;
+        text-align: center;
+    }
+
+    /*欢迎句的盒子*/
+    div[id="welcomeWords"]{
+        text-align: center;
+        margin-top: 220px;
+    }
+
+    span[class=welcome]{
+        font-size: 25px;
+        font-weight: bold; /*加粗字体*/
+        color: #726d6d;
+    }
+</style>
+<body>
+<div id="app">
+    <div id="headBox">
+        <div id="title">
+            <span>后台管理系统</span>
+        </div>
+
+        <div id="manager">
+            <a href="/page/manager/musicMange.html">音乐管理</a>
+            <a href="/page/index.html">返回音乐城</a>
+        </div>
+    </div>
+
+    <div id="main">
+        <div id="welcomeWords">
+        <span class="welcome">欢迎管理员进入后台管理系统 </span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

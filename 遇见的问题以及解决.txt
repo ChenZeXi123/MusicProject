@@ -1,0 +1,202 @@
+问题1：如何让标签以并排的形式进行排列?
+答:在这些标签的父盒子中使用样式display=flex即可。
+
+问题2:如何实现使用v-for循环将遍历到的元素赋值到标签的属性上?
+答:在标签的属性前使用v-bind修饰,那么该属性就会绑定当前遍历到的元素值。
+
+问题3:当v-for遍历的数组对象的数据发生改变时,如何使v-for中的数组数据进行同步更新?
+答案:在v-for中添加:key="item"。
+ 例如:
+ <p v-for="(user,index) in users" :key="user.name">
+         {{user}}
+     </p>
+  注意：
+  1):key赋予的值类型只能是number类型和String类型
+  2):key最好绑定元素值,而不是绑定index。
+
+问题4:favicon.ico图片如何加载在页面的标题上?
+答:将图片下载好后,将图片的后缀名改为.ico,然后放在static目录下。
+  注意:如果完成好以上步骤还是无法加载出来,那么需要将页面的cookie和session清除,然后重新打开浏览器。
+
+问题5:resources目录下的静态资源如何引用其他的静态资源?
+答:需要将静态资源都放在static目录下或public目录下,这样才可以正常引用。
+例:
+  <img src="../static/picture/img1.jpg">
+
+问题6:如何在springboot中使用mybatis的分页功能?
+答:
+1)<!--导入springboot整合分页插件-->
+ <dependency>
+     <groupId>com.github.pagehelper</groupId>
+     <artifactId>pagehelper-spring-boot-starter</artifactId>
+     <version>1.4.1</version>
+ </dependency>
+注意:如果出现分页插件的依赖循环问题,那么提升分页插件依赖版本。或者在配置文件中配置...上网查(循环依赖如何解决)
+
+问题7:springboot配置的thymeleaf的默认配置的前缀后缀?
+答:默认前缀是:"/templates/" 后缀是:".html"
+
+问题8:在前端调用有参函数时,传入实参时,为什么加上this.会报错？
+答:估计...形参位置不能加上this
+
+问题9:使用拦截器判断用户是否有登录,若没有登录,则使用request的dispatchServlet方法跳转到登录页面时,为什么会栈溢出?
+答:如果拦截器设置的拦截路径为"/**"那么就是拦截所有路径。当拦截器的preHandle方法转发请求时,该请求又会被拦截,造成无限循环,使得栈溢出。
+正确做法应该如下:
+ //需要将拦截器中preHandle中转发的路径过排除掉
+ registry.addInterceptor(new Interceptors()).addPathPatterns("/**").excludePathPatterns("/login");
+
+问题10:当拦截器转发跳转页面后爆出:Cannot call sendError() after the response has been committed错误,怎么解决?
+答:
+ 拦截器转发的路径不能是控制器方法中的请求路径,必须是由静态资源处理获取页面才可以！
+
+问题11:如何给单元格添加水平下划线?
+答:
+ 1)首先,需要给table表格标签添加border-collapse:collapse样式,该样式的作用为:合并单元格的边框。
+ 2)然后,再给td单元格标签添加border-bottom: solid 1px #ada8a8样式,该样式作用是:设置单元格下边框。
+    如果仅仅只设置td的border-bottom,那么单元格将只有下边框,左右和上的边框都没有！
+
+问题12:padding在单元格的作用?
+答:
+ 在单元格中,padding的设置是代表单元格中的内容与单元格内沿四周的间距。
+ padding要设置四个方位的数值,也可以通过padding-left等设置单方位值。
+
+问题13:为什么有时候使用thymeleaf修饰的href属性的超链接会有问题?
+答:还不知道
+
+问题14:在springboot的工程下使用thymeleaf获取request、session等域对象中获取值时,如果当前的请求没有添加对应的属性值,
+那么就会报错为-->org.springframework.expression.spel.SpelEvaluationException: EL1007E: Property or field 'id' cannot be found on null
+答:
+以后再使用thymeleaf获取域对象值时,如果要获取域对象中的值是一个对象中的属性,则要加上'?'进行判断。
+例如:<input name="id" type="text" th:value="${music?.id}">
+
+问题15:在springboot工程中,使用"forward:/"进行页面跳转时,在request、session等域对象中保存数据后,会保存到跳转后的html页面吗？
+答:
+ 不会！只要是forward进行的页面转发,在域对象中保存的数据都不会保存到域对象中。只有不带有任何前缀的页面转发才可以！
+
+问题16:在JavaScript中如何实现页面跳转?
+答:
+ 使用window.location.href=""即可。
+
+问题17:如何在光标停留处显示提示语?
+答:
+ 1.首先,在vue的data中设置属性
+  例:
+  data:{
+    mytitle:"提示词"
+  }
+
+ 2.然后,在标签使用:title="mytitle"。
+ 这样光标停留的标签就会显示data对应的属性值了。
+
+
+问题17：如何使用axios.post请求方式向后端传送对象类型参数？并且后端如何接收前端发送的json字符串?
+答:
+ axios.post("/insertMusic", JSON.stringify(myMusic),
+                     {
+                         headers: {
+                         'Content-Type': 'application/json'
+                     },
+           });
+
+post(参数1,参数2,{参数3})
+ 参数1:控制器方法对应的请求路径
+ 参数2:需要将对象类型参数转变为json字符串
+ 参数3:需要设置请求头中的参数 headers的接收类型为: 'Content-Type': 'application/json'
+
+后端在控制方法中使用@RequestBody注解接收,使用的形参为实例类型,也就要创建一个对应的bean对象。
+例如:public void insertMusic(@RequestBody Music music){}
+
+问题18：播放器的宽度和高度是多少？
+答:默认with大约300px,不能修改！高度忘记了,也不能修改！
+
+问题19：vue中的this.$confirm()函数如何使用？
+在Vue框架中，`this.$confirm().then(()=>{})` 是使用Element UI库中的确认框组件来显示一个确认对话框，并在用户点击确定后执行回调函数的操作。
+具体使用方法如下：
+1. 首先，确保你已经在项目中引入了Element UI库，并且已经注册为Vue的插件。
+
+2. 在Vue组件中，你可以通过`this.$confirm()`方法来调用确认对话框组件。
+   this.$confirm('确定要执行该操作吗？', '提示', {type: 'warning' }).then(() => {
+     // 用户点击了确定按钮，执行的回调函数
+     // 在这里可以编写你想要执行的操作
+   }).catch(() => {
+     // 用户点击了取消按钮，执行的回调函数
+     // 在这里可以编写你想要执行的操作
+   });
+
+   `this.$confirm()`方法接受三个参数：
+   - 第一个参数是对话框的内容。
+   - 第二个参数是对话框的标题。
+   - 第三个参数是一个配置对象，用于设置对话框的按钮文本、类型等属性。
+
+ type：对话框的类型，可选值为"success"、"warning"、"info"、"error"，用于显示不同的图标，默认为"info"。
+
+问题20：如何使用delete请求方式携带参数给后端,后端又该如何接收参数？
+答：
+  1.在前端使用axios时,携带参数要使用params属性,参数以json格式传输
+    axios.delete("/deleteMusicById", {params:{id:id}}).then((res)=>{})
+
+  2.在后端接收参数时,要使用@RequestParam("id")  进行接收参数。
+
+问题21：thymeleaf抽取页面共同部分,又个问题,就是如果浏览器地址发送变化后,thymeleaf引用的共同部分就会失效,怎么解决？
+答:不知道
+
+问题22:如何转被拦截器拦截后,在preHandle()方法中,转发带有参数的post请求到别的页面？
+例如拦截下面这个请求,如何进行转发?
+    @PostMapping("/insertMusic")
+    public String insertMusic(@RequestBody Music music, HttpSession session, HttpServletResponse response) throws ServletException, IOException {
+        if (session.getAttribute("user")==null){
+            return "添加失败,请先登录噢!";
+        }
+
+问题:如何单独使用el-upload标签？
+
+
+问题23：如何获取element组件的dom对象？
+答:
+ 1)首先要在需要获取的组件标签中设置ref属性,例如:<el-form ref="myForm"></el-form>
+ 1)然后获取组件的引用:$refs.myForm是一个对<el-form>组件的引用,它指向该组件的Vue实例。
+ 2)再通过$el获取组件的引用对应的dom对象：而$refs.myForm.$el则是该组件所管理的DOM元素。
+
+问题24:如何不使用el-input标签的type=submit属性去提交表单,而是通过事件绑定提交el-form表单？
+ 1.要自己创建一个el-button标签,创建触发点击事件
+ 2.获取el-form表单的dom对象
+ 3.通过dom对象调用submit()方法提交表单:this.$refs.myForm.$el.submit();
+
+问题25:如何动态改变el-form标签的action属性值?
+ 1.先获取el-form的对象(参照问题23即可)
+ 2.通过dom对象调用setAttribute()方法:this.$refs.myForm.$el.setAttribute('action', "/addMusic");
+ 注意：
+  1)首先不可以通过el-input标签的type=submit提交表单,因为这样表单已经提交出去了,action属性值也不会改变了！
+  2)要自己创建一个el-button标签,触发点击事件,在事件中通过this.$refs.myForm.$el.submit();提交表单
+
+
+问题26:如何获取el-form表单中,el-upload标签上传的文件和el-input标签中的参数？
+1.在el-upload标签添加属性:auto-upload="false",使其选定文件后不会自动上传,这样就可以同el-input标签提交表单后,将数据一起发送到后端。
+2.设置一个button标签,用于绑定单击事件,提交表单:
+  this.$refs.myForm.$el.submit();
+  >先获取el-form标签的引用,在获取他对应dom对象
+  >通过dom对象提交表单
+
+
+问题27：如何改变el-input输入框的值
+答：使用el-input要向能够改变输入框的值,必须要绑定v-model！
+
+问题28：为什么刚上传的文件在网页中找不到资源？
+答:
+文件上传的路径是要编译后的target目录下,
+也就是D:\springBoot2\bookProject\target\classes\static\ 必须要将上传的文件保存到此目录下,
+如果你是保存到src的目录下,那么此时你的服务器没有重新部署,没有将你上传的文件编译到target目录下,那么网页中是无法获取到你刚刚上传的文件的！
+
+问题29:
+答:
+   在html页面中,因为安全问题,浏览器是无法通过绝对路径获取资源的,只能通过相对路径获取资源。
+   因此,在上传文件时,要使用绝对路径上传到target目录下的静态资源目录。
+   在html页面中获取资源时,要使用相对路径。
+   所以资源路径地址保存到数据库时,要采用相对路径(相对于当前要获取资源的html页面),将资源的路径保存到数据库中,
+   这样当通过数据库获取到资源地址时,html就可以使用相对路径得到资源了。
+
+
+
+
+
+

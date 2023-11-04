@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑音乐</title>
+    <script src="../../js/axios-0.18.0.js"></script>
+    <script src="../../js/vue.js"></script>
+    <link rel="stylesheet" href="/webjars/element-ui/2.15.1/lib/theme-chalk/index.css">
+    <script src="/webjars/vue/2.6.11/dist/vue.js"></script>
+    <script src="/webjars/element-ui/2.15.1/lib/index.js"></script>
+    <style>
+        body{
+            font-family: 楷体,serif;
+        }
+
+        /*标题盒子和返回首页的盒子的父盒子*/
+        div[id=head]{
+            display: flex;
+        }
+
+        /*标题盒子*/
+        div[id=title]{
+            margin-top: 100px;
+            margin-left: 250px;
+            font-size: 50px;
+        }
+
+        /*返回首页的盒子*/
+        div[id="return"]{
+            font-weight: bold;
+            color: black;
+            margin-top: 130px;
+            margin-left: 800px;
+            font-size: 20px;
+        }
+
+        a{
+            text-decoration: none;
+        }
+
+        /*最外边框的盒子*/
+        div[id="main"]{
+            border: 1px solid;
+            width: 1100px;
+            height: 400px;
+            margin-left: 250px;
+        }
+
+        /*编写音乐信息的盒子*/
+        div[id=editBox]{
+            margin-left: 20px;
+            margin-top: 10px;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        table{
+            border-collapse: collapse;
+        }
+
+
+        tr[id=row1] td{
+            padding-left: 60px;
+            padding-right: 20px;
+            border-bottom: 1px solid #ada8a8;
+        }
+
+        tr[id=row2] td{
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ada8a8;
+        }
+
+        input{
+            margin-left: 20px;
+            text-align: center;
+        }
+
+        div[id="el-button"]{
+            height: 20px;
+        }
+
+
+    </style>
+</head>
+<body>
+<div id="head">
+    <div id="title">
+        <span>编辑音乐</span>
+    </div>
+    <div id="return">
+        <a href="/page/index.html">返回音乐城</a>
+    </div>
+</div>
+<div id="main">
+    <div id="editBox">
+        <form  method="post">
+            <!--用于判断当前是添加还是修改操作,如果isAdd不是空,则是添加操作-->
+            <input id="judge" type="hidden" th:value="${isAdd}">
+            <table>
+                <tr id="row1">
+                    <td>名称</td>
+                    <td>作者</td>
+                    <td>图片地址</td>
+                    <td>音频地址</td>
+                    <td></td>
+                </tr>
+                <tr id="row2">
+                    <td><input name="name" type="text" th:value="${music?.name}"></td>
+                    <td><input name="author" type="text" th:value="${music?.author}"></td>
+                    <td>
+                        <el-upload
+                            class="upload-demo"
+                            action="https://jsonplaceholder.typicode.com/posts/"
+                            :on-preview="handlePreview"
+                            :on-remove="handleRemove"
+                            :before-remove="beforeRemove"
+                            multiple=true
+                            :limit="3"
+                            :on-exceed="handleExceed"
+                            :file-list="fileList">
+
+                            <div id="el-button">
+                                <el-button  size="mini" type="primary">点击上传</el-button>
+                            </div>
+
+                            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件,且不超过500kb</div>
+
+                         </el-upload>
+                    </td>
+                    <td><input name="audioPath" type="file" th:value="${music?.audioPath}"></td>
+                    <td><input id="submit" type="submit" value="提交" @click="judgeUpdateOrInsert()"></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+</body>
+<script>
+    new Vue({
+        el:"#main",
+        data:{
+
+        },
+        methods:{
+            judgeUpdateOrInsert(){
+                //获取form对象
+                var forms = document.getElementsByTagName("form");
+                var form = forms[0];
+                //获取表单项
+                var inputEl = document.getElementById("judge");
+                //获取该表单项中value值
+                var flage=inputEl.value;
+                //当标签中的value属性值没初始化,那么默认就是为空字符串
+                if (flage!=null && flage!==""){
+                    form.action="/addMusic";
+                }else {
+                    form.action="/updateMusicInfoById";
+                }
+
+            }
+        }
+    })
+</script>
+</html>

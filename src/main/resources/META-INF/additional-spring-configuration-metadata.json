@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "spring.expression.compiler.mode=OFF",
+      "type": "java.lang.String",
+      "description": "Description for spring.expression.compiler.mode=OFF."
+  }
+] }

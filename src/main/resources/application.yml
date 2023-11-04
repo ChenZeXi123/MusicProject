@@ -1,0 +1,33 @@
+
+
+spring:
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/bookproject
+      username: root
+      password: czx2828kkjf
+  thymeleaf:
+    prefix: classpath:/static/page/
+
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+      enabled: true
+
+#spring.servlet.multipart.max-file-size用于设置单个文件的最大上传大小限制，
+#单位可以是KB、MB、GB等。该属性的默认值是1MB，即允许上传的单个文件最大为1MB。
+
+#spring.servlet.multipart.max-request-size用于设置整个请求的最大上传大小限制，即所有文件加起来的大小限制。
+#该属性的默认值是10MB，即整个请求的最大上传大小为10MB。
+
+pagehelper:
+  helper-dialect: mysql  #指明数据库
+  reasonable: true  #当pageNum<1时,就会查询第一页,当pageNum>pages时,就查最后一页。
+  support-methods-arguments: true #允许mapper接口传递参数
+  page-size-zero: true #当pageSize=0,查询全部内容。相当于没有执行分页功能
+
+
+server:
+  port: 8081

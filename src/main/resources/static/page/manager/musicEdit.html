@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑音乐</title>
+    <script src="../../js/axios-0.18.0.js"></script>
+    <script src="../../js/vue.js"></script>
+    <link rel="stylesheet" href="/webjars/element-ui/2.15.1/lib/theme-chalk/index.css">
+    <script src="/webjars/vue/2.6.11/dist/vue.js"></script>
+    <script src="/webjars/element-ui/2.15.1/lib/index.js"></script>
+    <style>
+        body{
+            font-family: 楷体,serif;
+        }
+
+        /*标题盒子和返回首页的盒子的父盒子*/
+        div[id=head]{
+            display: flex;
+        }
+
+        /*标题盒子*/
+        div[id=title]{
+            margin-top: 80px;
+            margin-left: 150px;
+            font-size: 50px;
+        }
+
+        /*返回管理系统首页的盒子*/
+        div[id="returnManageIndex"]{
+            font-weight: bold;
+            color: black;
+            margin-top: 110px;
+            margin-left: 780px;
+            font-size: 20px;
+        }
+
+        /*返回首页的盒子*/
+        div[id="return"]{
+            font-weight: bold;
+            color: black;
+            margin-top: 110px;
+            margin-left: 10px;
+            font-size: 20px;
+        }
+
+        a{
+            text-decoration: none;
+        }
+
+        /*最外边框的盒子*/
+        div[id="main"]{
+            border: 1px solid;
+            width: 1200px;
+            height: 500px;
+            margin-left: 150px;
+        }
+
+        /*编写音乐信息的盒子*/
+
+
+        /*要想改变表格中行和单元格中的内容居中显示,就通过table来改变*/
+        table{
+            border-collapse: collapse;
+            /*表格的宽度,决定着行的宽度*/
+            width: 1200px;
+            height: 400px;
+            text-align: center;
+        }
+
+        tr[class="row1"] td{
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        input{
+            text-align: center;
+            width: 800px;
+            height: 50px;
+        }
+
+        /*要想修改el-input标签的内容居中和输入框大小,只能通过id选择器去选择才有效果！*/
+        #el_input1{
+            text-align: center;
+            width: 800px;
+        }
+
+
+
+
+
+    </style>
+</head>
+<body>
+<div id="head">
+    <div id="title">
+        <span>编辑音乐</span>
+    </div>
+
+    <div id="returnManageIndex">
+        <a href="/page/manager/musicMange.html">管理音乐首页</a>
+    </div>
+
+    <div id="return">
+        <a href="/page/index.html">返回音乐城</a>
+    </div>
+</div>
+<div id="main">
+    <div id="editBox">
+        <el-form ref="myForm" action="" method="post" enctype="multipart/form-data" >
+            <!--用于判断当前是添加还是修改操作,如果isAdd不是空,则是添加操作-->
+            <input id="judge" type="hidden" th:value="${isAdd}">
+
+            <!--此id用于更新指定的音乐-->
+            <input type="hidden" name="id" th:value="${music?.id}">
+
+            <table>
+                <tr class="row1">
+                    <td>名称</td>
+                <tr>
+                <tr class="row1">
+                    <td>
+                        <input  name="name" type="text" th:value="${music?.name}">
+                    </td>
+                <tr>
+
+                <tr class="row1">
+                    <td>作者</td>
+                <tr>
+                <tr class="row1">
+                    <td>
+                        <input  name="author" type="text" th:value="${music?.author}">
+                    </td>
+                <tr>
+
+                <tr class="row1">
+                    <td>图片</td>
+                <tr>
+                <tr class="row1">
+                    <td>
+                        <input name="imgPath" type="text" th:value="${music?.imgPath}">
+                        <!--
+                         :accept="'image/jpeg,image/png'"表示接受后缀为jpg和png的图片
+                         :limit="5242880"图片大小不超过5M  5*1024*1024
+                        -->
+                        <el-upload
+                                class="upload-demo"
+                                name="imgPathByFile"
+                                :limit="3"
+                                :auto-upload="false"
+                                multiple
+                                :accept="'image/jpeg,image/png'"
+                                :on-exceed="handleExceed"
+                                :on-preview="handlePreview"
+                                :on-remove="handleRemove"
+                                :before-remove="beforeRemove"
+                                :on-success="handleSuccess"
+                                :file-list="fileList">
+                                <el-button  size="mini" type="primary">点击上传</el-button>
+                            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件,且不超过5M</div>
+                        </el-upload>
+                    </td>
+                <tr>
+
+                <tr class="row1">
+                    <td>音频</td>
+                <tr>
+                <tr class="row1">
+                    <td>
+                        <input  name="audioPath" type="text" th:value="${music?.audioPath}">
+                        <!--
+                        在:accept="'audio/mpeg'"  表示只支持上传mp3格式的音频
+                        :limit表示限制每一次能上传几个文件
+
+                        :on-preview="handlePreview"：用于设置预览文件的回调函数。
+                        当用户点击预览按钮时，会触发该回调函数，可以在该函数中实现文件预览的逻辑。回调函数的参数是当前点击的文件对象。
+
+                        :on-remove="handleRemove"：用于设置删除文件的回调函数。
+                        当用户点击删除按钮时，会触发该回调函数，可以在该函数中实现删除文件的逻辑。
+                        回调函数的参数是当前删除的文件对象。
+
+                        :before-remove="beforeRemove"：用于设置删除文件前的回调函数。
+                        在用户点击删除按钮之前，会先触发该回调函数。
+                        可以在该函数中进行删除文件的确认操作，例如弹出确认框。如果返回false，则会阻止文件的删除操作。
+
+                        :on-exceed="handleExceed"：用于设置文件超出个数限制的回调函数。
+                        当用户选择的文件个数超过了el-upload组件的limit属性时，会触发该回调函数。
+                        可以在该函数中实现超出文件个数限制时的逻辑，例如显示错误提示信息。
+                        -->
+                        <el-upload
+                                class="upload-demo"
+                                name="audioPathByFile"
+                                :accept="'audio/mpeg,audio/wav'"
+                                :limit="3"
+                                :auto-upload="false"
+                                :on-preview="handleAudioPreview"
+                                :before-remove="beforeAudioRemove"
+                                :on-success="handleAudioSuccess"
+                                :on-exceed="handleAudioExceed"
+                                multiple
+                                :file-list="fileList">
+                                <el-button  size="mini" type="primary">点击上传</el-button>
+                            <div slot="tip" class="el-upload__tip">只能上传mp3格式音频,且不超过10M</div>
+                        </el-upload>
+                    </td>
+                <tr>
+
+                <tr>
+                    <td><el-button   @click="judgeUpdateOrInsert()">提交数据</el-button></td>
+                </tr>
+            </table>
+        </el-form>
+    </div>
+</div>
+</body>
+<script>
+    new Vue({
+        el:"#main",
+        data:{
+            inputName:"",
+            inputAuthor:"",
+            inputImgPath:"",
+            inputAudioPath:""
+        },
+        methods:{
+            judgeUpdateOrInsert(){
+                //获取form对象
+                var forms = document.getElementsByTagName("form");
+                var form = forms[0];
+                //获取表单项
+                var inputEl = document.getElementById("judge");
+                //获取该表单项中value值
+                var flage=inputEl.value;
+                //当标签中的value属性值没初始化,那么默认就是为空字符串
+                if (flage!=null && flage!==""){
+                    // form.action="/addMusic";
+                    this.$refs.myForm.$el.setAttribute('action', "/addMusic");
+                }else {
+                    //form.action="/updateMusicInfoById";
+                    this.$refs.myForm.$el.setAttribute('action', "/updateMusicInfoById");
+                }
+                this.$refs.myForm.$el.submit();
+            },
+
+            //以下四个是audio文件上传的触发函数:
+            //删除上传的文件前会触发的函数
+            beforeAudioRemove(){
+                return this.$confirm("确定要删除此文件吗?","提示",type="warning");
+            },
+
+            //在预览上传文件时,会触发的函数
+            handleAudioPreview(){
+                this.$message.info("只能选择pm3格式的音乐噢！");
+            },
+
+            //上传的音频个数超过限制时,触发的函数
+            handleAudioExceed(){
+                this.$message.error("一次只能上传一个文件噢！");
+            },
+
+            handleAudioSuccess(){
+                this.$message.success("文件上传成功！");
+            }
+        }
+    })
+</script>
+</html>

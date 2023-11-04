@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="java" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Page</title>
+  <script src="../js/vue.js"></script>
+  <script src="../js/axios-0.18.0.js"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+ <style>
+   div[id="return"]{
+     margin-left: 1200px;
+     font-weight: bold;
+   }
+   div[id="welcomeLogin"]{
+     margin-top: 150px;
+     margin-left: 600px;
+     font-size: 50px;
+   }
+ </style>
+<body>
+<div id="main">
+  <div id="return">
+    <a href="/page/index.html">返回音乐城</a>
+  </div>
+  <div id="welcomeLogin">
+    <p>欢迎来到古风音乐城！</p>
+  </div>
+  <div id="div01" class="container">
+    <h1>登录</h1>
+    <form action="/judgeUserIfo" method="post">
+      <label for="username">用户名:</label>
+      <input type="text" id="username" name="username" required>
+      <br>
+      <label for="password">密码:</label>
+      <input type="password" id="password" name="password" required>
+      <br>
+      <input type="submit" value="登录" > <span id="msg" th:text="${session.msg}"></span>
+    </form>
+    <p>还没有账号? <a href="/page/register.html">点击注册</a></p>
+  </div>
+
+</div>
+</body>
+
+<script>
+  /*
+  1.在使用vue对象时,el属性一定要写,不然后面的方法和data都会无效。
+  2.vue的事件绑定格式:在标签中写@click="方法名()",在vue对象中的methods：{
+                                                             方法名(){},
+                                                           }
+
+   */
+  new Vue({
+    el:"#div01",
+    mounted(){
+
+    },
+    methods: {
+    }
+
+  })
+</script>
+
+</html>

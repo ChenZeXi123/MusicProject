@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>音乐管理系统</title>
+<script src="../../js/vue.js"></script>
+<script src="../../js/axios-0.18.0.js"></script>
+  <link rel="stylesheet" href="/webjars/element-ui/2.15.1/lib/theme-chalk/index.css">
+  <script src="/webjars/vue/2.6.11/dist/vue.js"></script>
+  <script src="/webjars/element-ui/2.15.1/lib/index.js"></script>
+</head>
+<style>
+  /*页头盒子:仅用于管理标题和超链接的排版*/
+  div[id="headBox"]{
+    display: flex; /*并排显示*/
+  }
+
+  /*标题盒子:后台管理系统*/
+  div[id=title]{
+    margin-left: 200px;
+    margin-top: 50px;
+    color: #726d6d;
+    font-size: 50px;
+  }
+
+  /*超链接盒子*/
+  div[id=manager]{
+    margin-left: 600px;
+    font-size: 20px;
+    margin-top: 100px;
+  }
+
+  a{
+    text-decoration: none;
+  }
+
+  /*最外边边框的盒子*/
+  div[id="main"]{
+    border: 1px solid;
+    width: 1100px;
+    height: 500px;
+    margin-left: 200px;
+    text-align: center;
+  }
+
+  /*音乐信息的盒子*/
+  div[id="musicInfoMange"]{
+    margin-left: 100px;
+    font-size: 15px;
+
+    /*padding是和边框内沿的距离*/
+    padding-top: 40px;
+    padding-left: 50px;
+  }
+
+  table{
+    border-collapse:collapse; /*合并单元格边框*/
+  }
+
+  td{
+    border-bottom: solid 1px #ada8a8;  /*设置单元格下边框*/
+    align-content: center;
+    padding: 10px; /*设置单元格中的内容和单元格边框之间的距离*/
+  }
+
+  a{
+    cursor: pointer;
+    size: 10px;
+  }
+
+
+</style>
+<body>
+<div id="app">
+  <div id="headBox">
+    <div id="title">
+      <span>音乐管理系统</span>
+    </div>
+
+    <div id="manager">
+      <a href="/page/index.html">返回音乐城</a>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="musicInfoMange">
+      <table width="800px" >
+        <tr>
+          <td>id</td>
+          <td>名称</td>
+          <td>作者</td>
+          <td>图片地址</td>
+          <td>音频地址</td>
+          <td colspan="2">操作</td>
+        </tr>
+        <tr v-for="(music,index) in musics" :key="music.name">
+          <td id="id">{{music.id}}</td>
+          <td id="musicName">{{music.name}}</td>
+          <td>{{music.author}}</td>
+          <td>{{music.imgPath}}</td>
+          <td>{{music.audioPath}}</td>
+
+          <td>
+            <form action="/getInfoById" method="get">
+              <input name="id" :value="music.id" type="hidden">
+              <input type="submit" value="修改">
+            </form>
+
+          </td>
+          <td>
+            <form action="/deleteInfoById" method="get">
+              <input name="musicId" :value="music.id" type="hidden">
+              <input  type="submit" value="删除" @click="deleteConfirm(music.name)">
+            </form>
+          </td>
+        </tr>
+
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td colspan="2">
+            <a href="/judgeAdd">添加音乐</a>
+          </td>
+        </tr>
+
+      </table>
+    </div>
+
+    <!--分页盒子-->
+    <div id="page">
+
+      <a v-show="pageInfo.pageNum!==1" @click="getMusicByPageNum(1)" >首页</a>
+      <a v-show="this.pageInfo.hasPreviousPage" @click="getMusicByPageNum(pageInfo.prePage)" >上一页</a>
+
+      <!--遍历分页导航页码,将当前元素作为形参,从而获取当前点击的是第几页-->
+      <a  class="navigatePage" v-for="(page,index) in navigatepages"
+          @click="getMusicByPageNum(page)">
+        <span v-if="pageInfo.pageNum===page">[{{page}}]</span>
+        <span v-else>{{page}}</span>
+      </a>
+
+      <a v-show="pageInfo.hasNextPage" @click="getMusicByPageNum(pageInfo.nextPage)">下一页</a>
+      <a v-show="pageInfo.pageNum!==pageInfo.pages" @click="getMusicByPageNum(pageInfo.pages)" >末页</a>
+
+      <span>总共有{{pageInfo.pages}}页,有{{pageInfo.total}}条数据</span>
+    </div>
+
+  </div>
+</div>
+</body>
+<script >
+/*
+一、vue的生命周期
+  1.vue的生命周期都会对应着一个函数,也就是当运行到对应生命周期时,就会调用指定的函数。
+    2.vue中常见的钩子函数：
+  >beforeCreate:没有data,没有dom对象
+
+  >created():在这个阶段,已经加载好了vue对象的data、methods。因此可以发起异步请求获取后端数据。
+               但是此阶段没有dom对象。
+
+  >beforeMount():有data,没有dom对象。几乎不用此方法
+
+  >mounted:加载好了vue对象的data、methods,并且页面已经加载到了浏览器中,可以获取dom对象。
+        该方法使用与操作页面中的dom对象。进行增删改等操作。
+   */
+  new Vue({
+    el:"#app",
+
+    data:{
+      musics:[],
+      navigatepages:[],
+      pageInfo:[]
+    },
+
+    mounted(){
+      this.getAll();
+    },
+
+    methods:{
+      getAll(){
+        axios.get("/getAll").then((res)=>{
+          this.musics=res.data.list;
+          this.navigatepages=res.data.navigatepageNums;
+          this.pageInfo=res.data;
+        })
+      },
+
+      getMusicByPageNum(page){
+        axios.get("/getMusicByPageNum?pageNum="+page).then((res)=>{
+          this.musics=res.data.list;
+          this.navigatepages=res.data.navigatepageNums;
+          this.pageInfo=res.data;
+        })
+      },
+
+      getInfoByName() {
+        var tdElement = document.getElementById("musicName");
+        var musicName = tdElement.innerText;
+        axios.get("/getInfoByName?name="+musicName).then((res)=>{
+
+        })
+      },
+
+      //确认删除
+      deleteConfirm(name){
+        confirm("确定要删除:["+name+"]吗?");
+      },
+
+    }
+  })
+</script>
+</html>

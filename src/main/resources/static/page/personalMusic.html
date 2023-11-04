@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>我的音乐</title>
+    <script src="../js/axios-0.18.0.js"></script>
+    <script src="../js/vue.js"></script>
+
+    <link rel="stylesheet" href="/webjars/element-ui/2.15.1/lib/theme-chalk/index.css">
+    <script src="/webjars/vue/2.6.11/dist/vue.js"></script>
+    <script src="/webjars/element-ui/2.15.1/lib/index.js"></script>
+    <style>
+        div[id="app"]{
+            width: 1400px;
+            height: 600px;
+            border: 1px solid ;
+            margin-left: 20px;
+            margin-top: 80px;
+            font-family: 楷体;
+        }
+        div[id="return"]{
+            margin-left: 1200px;
+            font-size: 20px;
+        }
+
+        /*仅用于将音乐信息排列为并排的盒子*/
+        div[id="main"]{
+            display: flex;
+        }
+
+        div[id="allMusicInfo"]{
+            margin-top: 175px;
+            border: 1px solid;
+            width: 300px;
+            height: 350px;
+            margin-left: 40px;
+        }
+
+        img{
+            cursor: pointer;
+        }
+
+        div[id=audio]{
+            margin-top: 5px;
+        }
+
+        div[id="musicInfo"]{
+            text-align: center;
+            margin-top: 10px;
+            font-size: 20px;
+            background-color: #cccccc;
+        }
+
+        /*分页导航盒子*/
+        div[id="pageInfo"]{
+            border: black solid 1px;
+            border-radius: 50px;
+            margin-top: 10px;
+            font-size: 20px;
+            font-weight: bold; /*加粗字体*/
+            /*设置分页边框宽距和高距*/
+            width: 600px;
+            height: 30px;
+            text-align: center;
+            margin-left: 400px;
+
+            padding-top: 7px;/*设置页码和边框内沿的距离*/
+        }
+
+        a{
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="return">
+        <a href="/page/index.html">返回音乐城</a>
+    </div>
+
+    <div id="main">
+        <div id="allMusicInfo" v-for="(music,index) in musics" :key="music.id">
+            <div id="imgBox">
+                <img :src="music.imgPath" @click="deleteMusic(music.id,music.name)" width="300px" height="200px" :title="deleteInfo">
+            </div>
+            <div id="audio">
+                <audio :src="music.audioPath" controls="controls" ></audio>
+            </div>
+            <div id="musicInfo">
+                <div id="music_name">
+                    歌名:<span>{{music.name}}</span>
+                </div>
+                <div id="music_author">
+                    作者:<span>{{music.author}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pageInfo">
+        <a  @click="getAll(1)">首页</a>
+        <a v-show="pageInfo.hasPreviousPage" @click="getAll(pageInfo.prePage)">上一页</a>
+        <a   v-for="(page,index) in pageInfo.navigatepageNums"  @click="getAll(page)">
+            <span v-if="pageInfo.pageNum===page">[{{page}}]</span>
+            <span v-else>{{page}}</span>
+        </a>
+        <a v-show="pageInfo.hasNextPage" @click="getAll(pageInfo.nextPage)">下一页</a>
+        <a  @click="getAll(pageInfo.pages)">末页</a>
+    </div>
+</div>
+</body>
+<script>
+    new Vue({
+        el:"#app",
+        data:{
+            musics:[],
+            pageInfo:[],
+            deleteInfo:"删除此音乐"
+        },
+        mounted(){
+            this.getAll(1);
+        },
+        methods:{
+            getAll(page){
+                if (page==null || page===""){
+                    page=1;
+                }
+
+                axios.get("/getPersonalMusics?pageNum="+page).then((res)=>{
+                    this.musics=res.data.list;
+                    this.pageInfo=res.data;
+                })
+            },
+
+            deleteMusic(id,name) {
+                this.$confirm('此操作将永久删除['+name+'], 是否继续?', '提示', {type: 'warning'}).then(() => {
+                    axios.delete("/deleteMusicById", {params:{id:id}}).then((res)=>{
+                        this.$message({
+                            type: 'success',
+                            message: '删除成功!'
+                        });
+                        //删除之后,重新获取数据库数据,才能更新页面
+                        this.getAll(1);
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            }
+
+        }
+    })
+</script>
+</html>
